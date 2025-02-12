@@ -104,7 +104,7 @@ static void userInterfaceMatrixKeypadUpdate()
     static int numberOfHashKeyReleased = 0;
     char keyReleased = matrixKeypadUpdate();
 
-    if( keyReleased != '\0' ) {
+    if( keyReleased != '\\0' ) {
 
         if( sirenStateRead() && !systemBlockedStateRead() ) {
             if( !incorrectCodeStateRead() ) {
@@ -132,52 +132,44 @@ static void userInterfaceMatrixKeypadUpdate()
 static void userInterfaceDisplayInit()
 {
     displayInit();
-     
-    displayCharPositionWrite ( 0,0 );
-    displayStringWrite( "Temperature:" );
-
-    displayCharPositionWrite ( 0,1 );
-    displayStringWrite( "Gas:" );
-    
-    displayCharPositionWrite ( 0,2 );
-    displayStringWrite( "Alarm:" );
+    displayCharPositionWrite(0, 0);
+    displayStringWrite("Tmp:");
 }
 
 static void userInterfaceDisplayUpdate()
 {
     static int accumulatedDisplayTime = 0;
-    char temperatureString[3] = "";
+    char temperatureString[4] = "";
     
-    if( accumulatedDisplayTime >=
-        DISPLAY_REFRESH_TIME_MS ) {
+    if( accumulatedDisplayTime >= DISPLAY_REFRESH_TIME_MS ) {
 
         accumulatedDisplayTime = 0;
 
-        sprintf(temperatureString, "%.0f", temperatureSensorReadCelsius());
-        displayCharPositionWrite ( 12,0 );
-        displayStringWrite( temperatureString );
-        displayCharPositionWrite ( 14,0 );
-        displayStringWrite( "'C" );
-
-        displayCharPositionWrite ( 4,1 );
-
-        if ( gasDetectorStateRead() ) {
-            displayStringWrite( "Detected    " );
-        } else {
-            displayStringWrite( "Not Detected" );
-        }
-
-        displayCharPositionWrite ( 6,2 );
+        sprintf(temperatureString, "%2.0f", temperatureSensorReadCelsius());
+        displayCharPositionWrite(5, 0);
+        displayStringWrite(temperatureString);
+        displayCharPositionWrite(7, 0);
+        displayStringWrite("\xDF");  // LCD 16x2 HD44780 degree symbol
+        displayStringWrite("C Gas:");
         
-        if ( sirenStateRead() ) {
-            displayStringWrite( "ON " );
+        displayCharPositionWrite(13, 0);
+        if ( gasDetectorStateRead() ) {
+            displayStringWrite("D");
         } else {
-            displayStringWrite( "OFF" );
+            displayStringWrite("ND");
         }
-
+        
+        displayCharPositionWrite(0, 1);
+        displayStringWrite("Alarm: ");
+        
+        displayCharPositionWrite(7, 1);
+        if ( sirenStateRead() ) {
+            displayStringWrite("ON ");
+        } else {
+            displayStringWrite("OFF");
+        }
     } else {
-        accumulatedDisplayTime =
-            accumulatedDisplayTime + SYSTEM_TIME_INCREMENT_MS;        
+        accumulatedDisplayTime = accumulatedDisplayTime + SYSTEM_TIME_INCREMENT_MS;        
     } 
 }
 
